@@ -1,0 +1,49 @@
+####################################################################
+# Install/Setup Nginx
+####################################################################
+- name: Install/Setup Nginx
+  apt:
+    name: ['nginx']
+    state: latest
+
+- name: Copy nginx.conf
+  template:
+    src: conf/nginx/nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0400
+
+- name: Copy nginx_fleetdm.conf
+  template:
+    src: 'conf/ansible/nginx/nginx_fleetdm.conf'
+    dest: '/etc/nginx/conf.d/fleetdm.conf'
+    owner: root
+    group: root
+    mode: 0400
+
+- name: Copy fleetdm public cert
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/certs/nginx.crt'
+    owner: root
+    group: root
+    mode: 0644
+  with_fileglob:
+    - conf/tls/*.crt
+
+- name: Copy fleetdm private key
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/private/nginx.key'
+    owner: root
+    group: root
+    mode: 0400
+  with_fileglob:
+    - conf/tls/*.key
+
+- name: Start Nginx service
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

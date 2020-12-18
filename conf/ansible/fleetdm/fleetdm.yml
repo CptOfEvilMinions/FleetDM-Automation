@@ -1,0 +1,19 @@
+mysql:
+  address: 127.0.0.1:3306
+  database: '{{ mysql_fleetdm_db_name }}'
+  username: '{{ mysql_fleetdm_username }}'
+  password: '{{ mysql_fleetdm_password }}'
+redis:
+  address: 127.0.0.1:6379
+server:
+  address: 127.0.0.1:8080
+  cert: /etc/ssl/certs/fleetdm.crt
+  key: /etc/ssl/private/fleetdm.key
+auth:
+  jwt_key: '{{ fleetdm_jwt }}'
+filesystem:
+  status_log_file: /var/log/osquery/status.log
+  result_log_file: /var/log/osquery/result.log
+  enable_log_rotation: true
+logging:
+  json: true

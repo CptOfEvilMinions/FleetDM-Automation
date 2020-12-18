@@ -1,0 +1,11 @@
+- hosts: fleetdm
+  become: yes
+  become_user: root
+  tasks:
+    - include_vars: 'group_vars/fleetdm.yml'
+    - import_tasks: 'roles/fleetdm/init.yml'           # Init Linux 
+    - import_tasks: 'roles/fleetdm/setup_redis.yml'    # Install redis
+    - import_tasks: 'roles/fleetdm/setup_mysql.yml'    # Install MySQL
+    - import_tasks: 'roles/fleetdm/setup_fleetdm.yml'  # Instal FleetDM
+    - import_tasks: 'roles/fleetdm/setup_nginx.yml'    # Install NGINX
+    - import_tasks: 'roles/fleetdm/setup_ufw.yml'      # Configure firewall

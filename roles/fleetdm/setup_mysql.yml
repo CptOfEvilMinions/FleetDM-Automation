@@ -1,0 +1,100 @@
+####################################################################
+# Install/Setup MySQL
+####################################################################
+- name: Install/Setup MySQL {{ mysql_version }}
+  apt:
+    name: ['mysql-server-{{ mysql_version }}', 'python3-mysqldb', 'python3-pip']
+    state: latest
+
+- name: Start MySQL service
+  service:
+    name: mysql.service
+    state: restarted
+    enabled: yes
+
+####################################################################
+# Secure MySQL setup
+####################################################################
+- name: Attempt to collect all possible information using passwordless root access
+  community.mysql.mysql_info:
+    login_user: root
+  register: mysql_root_login
+  ignore_errors: yes
+
+- name: Removes all anonymous user accounts
+  community.mysql.mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+  when: not mysql_root_login.failed == true
+
+- name: Remove the MySQL test database
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+  when: not mysql_root_login.failed == true
+
+- name: Change root user 
+  community.mysql.mysql_user: 
+    login_user: root
+    login_password: ''
+    name: 'root'
+    password: '{{ mysql_root_password }}'
+    priv: '*.*:ALL,GRANT'
+    host_all: yes
+  when: not mysql_root_login.failed == true
+
+
+# - name: Change root user password on first run
+#   mysql_user: login_user=root
+#               login_password=''
+#               name={{ mysql_root_user }}
+#               password={{ mysql_root_password }}
+#               priv=*.*:ALL,GRANT
+#               host={{ item }}
+#   with_items:
+#     - "{{ ansible_hostname }}"
+#     - '127.0.0.1'
+#     - ::1
+#     - localhost
+#   ignore_errors: yes
+
+####################################################################
+# Setup FleetDM database
+####################################################################
+- name: Create FleetDM database
+  community.mysql.mysql_db:
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    name: '{{ mysql_fleetdm_db_name }}'
+    state: present
+
+# - name: Create FleetDM database
+#   shell: mysql -u {{ mysql_root_user }} --password={{ mysql_root_password }} -e "CREATE DATABASE {{ mysql_fleetdm_dbname }};"
+#   ignore_errors: yes
+#   register: mysql_result
+#   failed_when: "'database exists' in mysql_result.stdout"
+
+- name: Create FleetDM database user
+  mysql_user:
+    name: '{{ mysql_fleetdm_username }}'
+    password: '{{ mysql_fleetdm_password }}'
+    priv: '{{ mysql_fleetdm_db_name }}.*:ALL'
+    state: present
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    host: localhost
+
+- name: Copy MySQL setting config
+  tempalte:
+    src: 'conf/ansible/mysql/fleetdm.cnf'
+    dest: '/etc/mysql/conf.d/fleetdm.cnf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  
+- name: Start MySQL service
+  service:
+    name: mysql.service
+    state: restarted
+    enabled: yes

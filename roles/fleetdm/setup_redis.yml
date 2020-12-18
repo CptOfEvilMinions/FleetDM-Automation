@@ -1,0 +1,13 @@
+####################################################################
+#  Install/Setup Redis
+####################################################################
+- name: Install/Setup Redis
+  package:
+    name: 'redis-server'
+    state: latest
+
+- name: Start redis service
+  service:
+    name: redis-server.service
+    state: restarted
+    enabled: yes

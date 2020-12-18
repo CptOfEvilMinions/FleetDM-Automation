@@ -1,0 +1,19 @@
+mysql:
+  address: mysql:3306
+  database: fleet_db_name
+  username: fleet_db_username
+  password: fleet_db_password
+redis:
+  address: redis:6379
+server:
+  address: 0.0.0.0:8080
+  cert: /etc/fleet/tls/fleet.crt
+  key: /etc/fleet/tls/fleet.key
+auth:
+  jwt_key: fleetdm_jwt_key
+filesystem:
+  status_log_file: /var/log/osquery/status.log
+  result_log_file: /var/log/osquery/result.log
+  enable_log_rotation: true
+logging:
+  json: true

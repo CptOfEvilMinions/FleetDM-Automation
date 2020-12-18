@@ -1,0 +1,85 @@
+version: '2.2'
+services:
+  ############################################## NGINX ##############################################
+  nginx:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile-NGINX
+      args: 
+        NGINX_VERSION: ${NGINX_VERSION}
+    container_name: fleet-nginx
+    restart: unless-stopped
+    ports: 
+      - 8000:80
+      - 8443:443
+    networks: 
+      - default
+      - fleet-backend
+    depends_on: 
+      - fleet
+
+  ############################################## fleet ##############################################
+  fleet:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile-FleetDM
+      args: 
+        - FLEETDM_VERSION=${FLEETDM_VERSION}
+        - FLEETDM_MYSQL_USER=${FLEETDM_MYSQL_USER}
+        - FLEETDM_MYSQL_PASSWORD=${FLEETDM_MYSQL_PASSWORD}
+        - FLEETDM_MYSQL_DATABASE=${FLEETDM_MYSQL_DATABASE}
+        - FLEETDM_JWT_KEY=${FLEETDM_JWT_KEY}
+    container_name: fleet-webgui
+    restart: unless-stopped
+    volumes: 
+      - fleet-logs:/var/log/osquery
+    networks: 
+      - fleet-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+        
+  ############################################## MySQL ##############################################
+  mysql:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile-MySQL
+      args: 
+        FLEETDM_MYSQL_VERSION: ${FLEETDM_MYSQL_VERSION}
+    container_name: fleet-mysql
+    restart: unless-stopped
+    environment: 
+      - MYSQL_ROOT_PASSWORD=${FLEETDM_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${FLEETDM_MYSQL_DATABASE}
+      - MYSQL_USER=${FLEETDM_MYSQL_USER}
+      - MYSQL_PASSWORD=${FLEETDM_MYSQL_PASSWORD}
+    volumes: 
+      - fleet-db:/var/lib/mysql
+    networks: 
+      - fleet-backend
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 1s
+      retries: 120
+
+  ############################################## Redis ##############################################
+  redis:
+    image: redis:${FLEETDM_REDIS_VERSION}
+    container_name: fleet-redis
+    restart: unless-stopped
+    networks: 
+      - fleet-backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  fleet-db:
+  fleet-logs:
+
+networks:
+  fleet-backend:

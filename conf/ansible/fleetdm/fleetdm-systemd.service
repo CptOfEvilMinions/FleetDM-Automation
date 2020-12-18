@@ -1,0 +1,10 @@
+[Unit]
+Description=Fleet FleetDM
+After=network.target
+
+[Service]
+LimitNOFILE=8192
+ExecStart=/usr/local/bin/fleet serve --config /etc/fleetdm/fleetdm.yml
+
+[Install]
+WantedBy=multi-user.target

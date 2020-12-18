@@ -1,0 +1,56 @@
+####################################################################
+# Setup hostname
+####################################################################
+- name: Set hostname
+  hostname:
+    name: '{{ hostname }}.{{ base_domain }}'
+
+- name: add myself to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.1\.1[ \t]+localhost'
+    line: '127.0.1.1 {{ hostname }}.{{ base_domain }}'
+    state: present
+
+####################################################################
+#  Setup Timedatectl
+####################################################################
+- name: Set time to {{ timezone }}
+  shell: timedatectl set-ntp on && timedatectl set-timezone {{ timezone }}
+
+####################################################################
+# Apt update
+####################################################################
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+    
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+####################################################################
+# Reboot
+####################################################################
+- name: Stat reboot
+  stat:
+    path: '/var/run/reboot-required'
+  register: reboot_status
+
+- name: Reboot a slow machine that might have lots of updates to apply
+  reboot:
+    reboot_timeout: 3600
+  when: reboot_status.stat.exists
+    
+####################################################################
+# Install software
+####################################################################
+- name: Install software
+  package:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - apt-transport-https
+    - htop
+    - tcpdump
+    - net-tools

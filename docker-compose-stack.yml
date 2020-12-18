@@ -1,0 +1,214 @@
+version: '3.7'
+services:
+  ############################################## NGINX ##############################################
+  nginx:
+    image: nginx:1.19.5-alpine
+    configs:
+      - source: nginx-config
+        target: /etc/nginx/nginx.conf
+      - source: nginx-fleetdm-config
+        target: /etc/nginx/conf.d/fleet.conf
+    secrets:
+      - fleetdm-tls-cert
+      - fleetdm-tls-key
+    ports: 
+      - 8000:80
+      - 8443:443
+    networks: 
+      - default
+      - fleet-backend
+    depends_on: 
+      - fleet
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 150M
+        reservations:
+          cpus: '0.25'
+          memory: 100M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 50
+        window: 120s
+
+
+  ############################################## fleet with config ##############################################
+  fleet:
+    image: fleetdm/fleet:3.5.1
+    env_file: .env
+    #command: sh -c "sed -i 's/fleet_mysql_password/$$(cat /run/secrets/mysql-fleetdm-password)/g' /etc/fleet/fleet.yml && sed -i 's/super_secret_key_here/$$(cat /run/secrets/fleetdm-jwt-key)/g' /etc/fleet/fleet.yml && /usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+    command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+    configs:
+      - source: fleetdm-config
+        target: /etc/fleet/fleet.yml
+    environment:
+      KOLIDE_MYSQL_PASSWORD: fleet
+      KOLIDE_AUTH_JWT_KEY: FdxvIZiar2EQXE3azq30An1YpwcSQSwk
+    secrets:
+      - mysql-fleetdm-password
+      - fleetdm-jwt-key
+      - fleetdm-tls-cert
+      - fleetdm-tls-key
+    volumes: 
+      - fleet-logs:/var/log/osquery
+    networks: 
+      - fleet-backend
+    depends_on:
+      - mysql
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2'
+          memory: 100M
+        reservations:
+          cpus: '0.5'
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 120s
+  
+  ############################################## fleet with ENV vars ##############################################
+  # fleet:
+  #   image: fleetdm/fleet:3.5.1
+  #   env_file: .env
+  #   command: sh -c "/usr/bin/fleet prepare db --no-prompt && /usr/bin/fleet serve"
+  #   environment:
+  #     KOLIDE_MYSQL_ADDRESS: mysql:3306
+  #     KOLIDE_MYSQL_DATABASE: fleet
+  #     KOLIDE_MYSQL_USERNAME: fleet
+  #     KOLIDE_MYSQL_PASSWORD: fleet
+  #     KOLIDE_REDIS_ADDRESS: redis:6379
+  #     KOLIDE_SERVER_ADDRESS: 0.0.0.0:8080
+  #     KOLIDE_AUTH_JWT_KEY: FdxvIZiar2EQXE3azq30An1YpwcSQSwk
+  #     KOLIDE_SERVER_CERT: /run/secrets/fleetdm-tls-cert
+  #     KOLIDE_SERVER_KEY: /run/secrets/fleetdm-tls-key
+  #     KOLIDE_LOGGING_JSON: 'true'
+  #     KOLIDE_OSQUERY_STATUS_LOG_PLUGIN: filesystem
+  #     KOLIDE_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
+  #     KOLIDE_OSQUERY_RESULT_LOG_PLUGIN: filesystem
+  #     KOLIDE_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
+  #   secrets:
+  #     - mysql-fleetdm-password
+  #     - fleetdm-jwt-key
+  #     - fleetdm-tls-cert
+  #     - fleetdm-tls-key
+  #   volumes: 
+  #     - fleet-logs:/var/log/osquery
+  #   networks: 
+  #     - fleet-backend
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #   # healthcheck:
+  #   #   test: 'CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1'
+  #   #   interval: 1m30s
+  #   #   timeout: 10s
+  #   #   retries: 3
+  #   #   start_period: 40s
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 3
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #         memory: 100M
+  #       reservations:
+  #         cpus: '0.5'
+  #         memory: 50M
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 5
+  #       window: 120s
+  
+  ############################################## MySQL ##############################################
+  mysql:
+    image: mysql:8.0
+    env_file: .env
+    configs:
+      - source: mysql-fleetdm-config
+        target: /etc/mysql/conf.d/fleetdm.cnf
+    environment: 
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql-root-password
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql-fleetdm-password
+      #- MYSQL_ROOT_PASSWORD=${FLEETDM_MYSQL_ROOT_PASSWORD}
+      #- MYSQL_DATABASE=${FLEETDM_MYSQL_DATABASE}
+      #- MYSQL_USER=${FLEETDM_MYSQL_USER}
+      #- MYSQL_PASSWORD=${FLEETDM_MYSQL_PASSWORD}
+      #- MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_DATABASE=fleet
+      - MYSQL_USER=fleet
+      #- MYSQL_PASSWORD=fleet
+    secrets:
+      - mysql-root-password
+      - mysql-fleetdm-password
+    volumes: 
+      - fleet-db:/var/lib/mysql
+    networks: 
+      - fleet-backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: '300M'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+
+  ############################################## Redis ##############################################
+  redis:
+    image: redis:6.0.9-alpine
+    networks: 
+      - fleet-backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
+        reservations:
+          cpus: '0.5'
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  fleet-db:
+  fleet-logs:
+
+networks:
+  fleet-backend:
+
+configs:
+  nginx-config:
+    file: ./conf/docker/nginx/nginx.conf
+  nginx-fleetdm-config:
+    file: ./conf/docker/nginx/fleetdm-swarm.conf
+  mysql-fleetdm-config:
+    file: ./conf/docker/mysql/fleetdm.cnf
+  fleetdm-config:
+    file: ./conf/docker/fleetdm/fleetdm-swarm.yml
+
+secrets:
+  mysql-root-password:
+    external: true
+  mysql-fleetdm-password:
+    external: true
+  fleetdm-tls-cert:
+    file: conf/tls/fleet.crt
+  fleetdm-tls-key:
+    file: conf/tls/fleet.key
+  fleetdm-jwt-key:
+    external: true

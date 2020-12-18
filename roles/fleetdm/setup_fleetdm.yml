@@ -1,0 +1,133 @@
+####################################################################
+# Install Fleetdm
+####################################################################
+- name: Install unzip
+  apt:
+    name: ['unzip']
+    state: latest
+
+- name: Create Fleet group
+  group:
+    name: 'fleetdm'
+    state: present
+
+- name: Create Fleetdm user
+  user:
+    name: fleetdm
+    shell: /usr/sbin/nologin
+
+- name: Stat Fleetdm install
+  stat:
+    path: '/usr/local/bin/fleet'
+  register: fleetdm_install
+  
+- name: Download Fleetdm
+  get_url:
+    url: '{{ fleetdm_dl_url }}'
+    dest: /tmp/fleet.zip
+  when: not fleetdm_install.stat.exists
+
+- name: Create temporary unzip directory
+  file:
+    path: /tmp/fleetdm
+    state: directory
+  when: not fleetdm_install.stat.exists
+
+- name: Unarchive Fleetdm
+  unarchive:
+    src: /tmp/fleet.zip
+    dest: /tmp/fleetdm
+    remote_src: true
+  when: not fleetdm_install.stat.exists
+
+- name: Copy Fleetdm Fleet binary
+  copy:
+    src: /tmp/fleetdm/linux/fleet
+    dest: /usr/local/bin/fleet
+    remote_src: true
+    owner: root
+    group: root
+    mode: 0755
+  when: not fleetdm_install.stat.exists
+
+####################################################################
+# Setup Fleetdm
+####################################################################
+- name: Create Fleetdm conf directory
+  file:
+    path: /etc/fleetdm
+    state: directory
+    owner: root
+    group: root
+
+- name: Create Fleetdm logging directory
+  file:
+    path: /var/log/osquery
+    state: directory
+    recursive: true
+    owner: fleetdm
+    group: fleetdm
+
+- name: Copy Fleetdm conf
+  template:
+    src: conf/ansible/fleetdm/fleetdm.yml
+    dest: /etc/fleetdm/fleetdm.yml
+    owner: root
+    group: fleet
+    mode: 0640
+
+- name: Copy Fleetdm public cert
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/certs/fleetdm.crt'
+    owner: root
+    group: root
+    mode: 0644
+  with_fileglob:
+    - conf/tls/*.crt
+
+- name: Copy Fleetdm private key
+  template:
+    src: '{{ item }}'
+    dest: '/etc/ssl/private/fleetdm.key'
+    owner: root
+    group: root
+    mode: 0400
+  with_fileglob:
+    - conf/tls/*.key
+
+####################################################################
+# Intialize Fleetdm
+####################################################################
+- name: Database exists
+  community.mysql.mysql_db:
+    login_user: 'root'
+    login_password: '{{ mysql_root_password }}'
+    name: '{{ mysql_fleetdm_db_name }}'
+    state: present
+  register: fleetdm_db_status
+
+- debug:
+    msg: '{{ fleetdm_db_status }} '
+
+- name: Intialize Fleetdm database
+  shell: /usr/local/bin/fleet prepare db --config /etc/fleetdm/fleetdm.yml
+  when: fleetdm_db_status.failed == false
+
+
+####################################################################
+# Setup Fleetdm systemD service
+####################################################################   
+- name: Copy Fleetdm SystemD
+  template:
+    src: 'conf/ansible/fleetdm/fleetdm-systemd.service'
+    dest: '/etc/systemd/system/fleetdm.service'
+    owner: root
+    group: root
+    mode: 0640
+
+- name: Start Fleetdm service
+  service:
+    name: fleetdm
+    state: restarted
+    enabled: yes

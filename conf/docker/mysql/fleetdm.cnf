@@ -1,0 +1,5 @@
+[mysqld]
+event_scheduler=ON
+slow_query_log=1
+log_output=TABLE
+log_queries_not_using_indexes=1

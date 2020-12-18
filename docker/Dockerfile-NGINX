@@ -1,0 +1,9 @@
+ARG NGINX_VERSION
+FROM nginx:${NGINX_VERSION}
+
+RUN mkdir /etc/nginx/tls
+COPY conf/tls/*.crt /etc/nginx/tls/fleet.crt
+COPY conf/tls/*.key /etc/nginx/tls/fleet.key
+
+COPY conf/docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY conf/docker/nginx/fleetdm.conf /etc/nginx/conf.d/fleet.conf

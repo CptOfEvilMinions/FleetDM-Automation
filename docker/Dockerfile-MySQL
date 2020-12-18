@@ -1,0 +1,3 @@
+ARG FLEETDM_MYSQL_VERSION
+FROM mysql:${FLEETDM_MYSQL_VERSION}
+COPY conf/docker/mysql/fleetdm.cnf /etc/mysql/conf.d/fleetdm.cnf
