@@ -1,3 +1,3 @@
 ####################################### General #######################################
-base_domain: 'hackinglab.beer'
+base_domain: 'hackinglab.local'
 timezone: 'Etc/UTC'

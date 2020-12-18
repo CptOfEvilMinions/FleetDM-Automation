@@ -1,0 +1,45 @@
+#########################################################
+# Install/Setup Osquery
+#########################################################
+- name: Stat Osquery Download
+  ansible.windows.win_stat:
+    path: "%LOCALAPPDATA%\\osquery-{{ osquery_version }}.msi"
+  register: osquery_dl
+
+- name: Download Osquery
+  ansible.windows.win_get_url:
+    url: "{{ osquery_exe_dl_url }}"
+    dest: "%LOCALAPPDATA%\\osquery-{{ osquery_version }}.msi"
+  when: not osquery_dl.stat.exists
+  
+- name: Stat Osquery install
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\osquery\\osqueryi.exe"
+  register: osquery_install
+
+- name: Install Osquery
+  win_package:
+    path: "{{ osquery_exe_dl_url }}"
+    state: present
+  when: not osquery_install.stat.exists
+
+- name: Write FleetDM public certificate contents to disk
+  copy:
+    content: "{{ fleetdm_public_cert }}"
+    dest: "C:\\Program Files\\osquery\\certs\\fleetdm.crt"
+
+- name: Write Osquery enroll secret to disk
+  copy:
+    content: "{{ osquery_enroll_secret }}"
+    dest: "C:\\Program Files\\osquery\\osquery.key"
+
+- name: Copy Osquery flags file
+  ansible.windows.win_template:
+    src: 'conf/osquery/osquery_windows.flags'
+    dest: "C:\\Program Files\\osquery\\osquery.flags"
+
+- name: Restart Osquery
+  ansible.windows.win_service:
+    name: 'osqueryd'
+    state: restarted
+    start_mode: auto

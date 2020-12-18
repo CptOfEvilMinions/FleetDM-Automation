@@ -1,0 +1,12 @@
+- hosts: 'osquery-windows'
+  tasks:
+    # Request variables for playbook
+    - include_vars: 'group_vars/fleetdm.yml'
+    - import_tasks: 'roles/osquery/init.yml'
+      delegate_to: localhost 
+      run_once: True
+
+    # Install/Setup Osquery on linux
+    - include_vars: 'group_vars/fleetdm.yml'
+    - include_vars: 'group_vars/osquery.yml'
+    - import_tasks: 'roles/osquery/setup_osquery_windows.yml'

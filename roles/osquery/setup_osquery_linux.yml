@@ -1,0 +1,55 @@
+#########################################################
+# Install/Setup Osquery
+#########################################################
+- name: Add APT GPG key for Osquery
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: "{{ osquery_gpg_key }}"
+
+- name: Add Osquery repo
+  apt_repository:
+    repo: "{{ osquery_repo_url }}"
+    state: present
+
+- name: Install Osquery
+  apt:
+    name: osquery
+    state: present
+
+- name: Write Kolide public certificate contents to disk
+  copy:
+    content: "{{ fleetdm_public_cert }}"
+    dest: "/etc/osquery/fleetdm.crt"
+
+- name: Sets permissions for /etc/osquery/fleetdm.crt
+  file:
+    path: '/etc/osquery/fleetdm.crt'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Write Osquery enroll secret to disk
+  copy:
+    content: "{{ osquery_enroll_secret }}"
+    dest: "/etc/osquery/osquery.key"
+
+- name: Sets permissions for /etc/osquery/osquery.key
+  file:
+    path: '/etc/osquery/osquery.key'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy Osquery flags file
+  template:
+    src: 'conf/osquery/osquery_linux.flags'
+    dest: '/etc/osquery/osquery.flags'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart Osquery
+  service:
+    name: 'osqueryd'
+    state: restarted
+    enabled: yes

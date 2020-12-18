@@ -1,0 +1,28 @@
+#########################################################
+# Get Kolide public certificate
+#########################################################
+- name:  Get Kolide public certificate
+  community.crypto.get_certificate:
+    host: "{{ fleetdm_fqdn }}"
+    port: "{{ fleetdm_port }}"
+  run_once: true
+  register: cert
+
+- set_fact:
+    fleetdm_public_cert: "{{ cert.cert }}"
+
+#########################################################
+# Get Osquery enroll secret from Kolide
+#########################################################
+- name: Get Osquery enrollment secret from Kolide
+  uri:
+    url: "https://{{ fleetdm_fqdn }}:{{ fleetdm_port }}/api/v1/kolide/spec/enroll_secret"
+    method: GET
+    return_content: yes
+    validate_certs: no
+    headers:
+      Authorization: "Bearer {{ lookup('env','FLEETDM_TOKEN') }}"
+  register: enroll_secret
+
+- set_fact:
+    osquery_enroll_secret: "{{ enroll_secret.json.specs.secrets[0].secret }}"

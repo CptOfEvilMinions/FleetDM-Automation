@@ -1,0 +1,6 @@
+####################################### Osquery #######################################
+osquery_version: '4.6.0'
+osquery_exe_dl_url: 'https://pkg.osquery.io/windows/osquery-{{ osquery_version }}.msi'
+
+osquery_gpg_key: '1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B'
+osquery_repo_url: 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
