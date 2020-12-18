@@ -64,7 +64,7 @@
   file:
     path: /var/log/osquery
     state: directory
-    recursive: true
+    recurse: yes
     owner: fleetdm
     group: fleetdm
 
@@ -73,7 +73,7 @@
     src: conf/ansible/fleetdm/fleetdm.yml
     dest: /etc/fleetdm/fleetdm.yml
     owner: root
-    group: fleet
+    group: fleetdm
     mode: 0640
 
 - name: Copy Fleetdm public cert

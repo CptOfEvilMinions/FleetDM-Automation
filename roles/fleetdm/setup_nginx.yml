@@ -8,7 +8,7 @@
 
 - name: Copy nginx.conf
   template:
-    src: conf/nginx/nginx.conf
+    src: conf/ansible/nginx/nginx.conf
     dest: /etc/nginx/nginx.conf
     owner: root
     group: root
