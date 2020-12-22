@@ -22,26 +22,6 @@
     group: root
     mode: 0400
 
-- name: Copy fleetdm public cert
-  template:
-    src: '{{ item }}'
-    dest: '/etc/ssl/certs/nginx.crt'
-    owner: root
-    group: root
-    mode: 0644
-  with_fileglob:
-    - conf/tls/*.crt
-
-- name: Copy fleetdm private key
-  template:
-    src: '{{ item }}'
-    dest: '/etc/ssl/private/nginx.key'
-    owner: root
-    group: root
-    mode: 0400
-  with_fileglob:
-    - conf/tls/*.key
-
 - name: Start Nginx service
   service:
     name: nginx

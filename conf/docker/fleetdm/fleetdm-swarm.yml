@@ -2,7 +2,7 @@ mysql:
   address: mysql:3306
   database: fleet
   username: fleet
-  password: /run/secrets/mysql-fleetdm-password
+  password_path: /run/secrets/mysql-fleetdm-password
 redis:
   address: redis:6379
 server:
@@ -10,7 +10,7 @@ server:
   cert: /run/secrets/fleetdm-tls-cert
   key: /run/secrets/fleetdm-tls-key
 auth:
-  jwt_key: /run/secrets/fleetdm-jwt-key
+  jwt_key_path: /run/secrets/fleetdm-jwt-key
 filesystem:
   status_log_file: /var/log/osquery/status.log
   result_log_file: /var/log/osquery/result.log

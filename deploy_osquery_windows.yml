@@ -1,4 +1,4 @@
-- hosts: 'osquery-windows'
+- hosts: 'osquery_windows'
   tasks:
     # Request variables for playbook
     - include_vars: 'group_vars/fleetdm.yml'

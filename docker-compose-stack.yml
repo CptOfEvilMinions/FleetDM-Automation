@@ -36,16 +36,14 @@ services:
 
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:3.5.1
-    env_file: .env
-    #command: sh -c "sed -i 's/fleet_mysql_password/$$(cat /run/secrets/mysql-fleetdm-password)/g' /etc/fleet/fleet.yml && sed -i 's/super_secret_key_here/$$(cat /run/secrets/fleetdm-jwt-key)/g' /etc/fleet/fleet.yml && /usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+    #image: fleetdm/fleet:3.5.1
+    image: fleet-local-build
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+    environment: 
+      KOLIDE_AUTH_JWT_KEY: CLl1kkH4vRZNoVobwfqzqS3bqAtEmFeLSjO7rik
     configs:
       - source: fleetdm-config
         target: /etc/fleet/fleet.yml
-    environment:
-      KOLIDE_MYSQL_PASSWORD: fleet
-      KOLIDE_AUTH_JWT_KEY: FdxvIZiar2EQXE3azq30An1YpwcSQSwk
     secrets:
       - mysql-fleetdm-password
       - fleetdm-jwt-key
@@ -131,21 +129,14 @@ services:
   ############################################## MySQL ##############################################
   mysql:
     image: mysql:8.0
-    env_file: .env
     configs:
       - source: mysql-fleetdm-config
         target: /etc/mysql/conf.d/fleetdm.cnf
     environment: 
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql-root-password
-      - MYSQL_PASSWORD_FILE=/run/secrets/mysql-fleetdm-password
-      #- MYSQL_ROOT_PASSWORD=${FLEETDM_MYSQL_ROOT_PASSWORD}
-      #- MYSQL_DATABASE=${FLEETDM_MYSQL_DATABASE}
-      #- MYSQL_USER=${FLEETDM_MYSQL_USER}
-      #- MYSQL_PASSWORD=${FLEETDM_MYSQL_PASSWORD}
-      #- MYSQL_ROOT_PASSWORD=toor
-      - MYSQL_DATABASE=fleet
-      - MYSQL_USER=fleet
-      #- MYSQL_PASSWORD=fleet
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/mysql-root-password"
+      MYSQL_PASSWORD_FILE: "/run/secrets/mysql-fleetdm-password"
+      MYSQL_DATABASE: "fleet"
+      MYSQL_USER: "fleet"
     secrets:
       - mysql-root-password
       - mysql-fleetdm-password
