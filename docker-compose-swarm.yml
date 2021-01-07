@@ -35,15 +35,59 @@ services:
 
 
   ############################################## fleet with config ##############################################
+  # fleet:
+  #   image: fleetdm/fleet:3.6.0
+  #   command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+  #   configs:
+  #     - source: fleetdm-config
+  #       target: /etc/fleet/fleet.yml
+  #   secrets:
+  #     - mysql-fleetdm-password
+  #     - fleetdm-jwt-key
+  #     - fleetdm-tls-cert
+  #     - fleetdm-tls-key
+  #   volumes: 
+  #     - fleet-logs:/var/log/osquery
+  #   networks: 
+  #     - fleet-backend
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 3
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #         memory: 100M
+  #       reservations:
+  #         cpus: '0.5'
+  #         memory: 50M
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 10
+  #       window: 120s
+  
+  ############################################## fleet with ENV vars ##############################################
   fleet:
-    #image: fleetdm/fleet:3.5.1
-    image: fleet-local-build
-    command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
-    environment: 
-      KOLIDE_AUTH_JWT_KEY: CLl1kkH4vRZNoVobwfqzqS3bqAtEmFeLSjO7rik
-    configs:
-      - source: fleetdm-config
-        target: /etc/fleet/fleet.yml
+    image: fleetdm/fleet:3.6.0
+    command: sh -c "/usr/bin/fleet prepare db && /usr/bin/fleet serve"
+    environment:
+      KOLIDE_MYSQL_ADDRESS: mysql:3306
+      KOLIDE_MYSQL_DATABASE: fleet
+      KOLIDE_MYSQL_USERNAME: fleet
+      KOLIDE_MYSQL_PASSWORD_PATH: /run/secrets/mysql-fleetdm-password
+      KOLIDE_REDIS_ADDRESS: redis:6379
+      KOLIDE_SERVER_ADDRESS: 0.0.0.0:8080
+      KOLIDE_AUTH_JWT_KEY_PATH: /run/secrets/fleetdm-jwt-key
+      KOLIDE_SERVER_CERT: /run/secrets/fleetdm-tls-cert
+      KOLIDE_SERVER_KEY: /run/secrets/fleetdm-tls-key
+      KOLIDE_LOGGING_JSON: 'true'
+      #KOLIDE_OSQUERY_STATUS_LOG_PLUGIN: filesystem
+      #KOLIDE_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
+      #KOLIDE_OSQUERY_RESULT_LOG_PLUGIN: filesystem
+      #KOLIDE_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
     secrets:
       - mysql-fleetdm-password
       - fleetdm-jwt-key
@@ -71,60 +115,6 @@ services:
         delay: 5s
         max_attempts: 10
         window: 120s
-  
-  ############################################## fleet with ENV vars ##############################################
-  # fleet:
-  #   image: fleetdm/fleet:3.5.1
-  #   env_file: .env
-  #   command: sh -c "/usr/bin/fleet prepare db --no-prompt && /usr/bin/fleet serve"
-  #   environment:
-  #     KOLIDE_MYSQL_ADDRESS: mysql:3306
-  #     KOLIDE_MYSQL_DATABASE: fleet
-  #     KOLIDE_MYSQL_USERNAME: fleet
-  #     KOLIDE_MYSQL_PASSWORD: fleet
-  #     KOLIDE_REDIS_ADDRESS: redis:6379
-  #     KOLIDE_SERVER_ADDRESS: 0.0.0.0:8080
-  #     KOLIDE_AUTH_JWT_KEY: FdxvIZiar2EQXE3azq30An1YpwcSQSwk
-  #     KOLIDE_SERVER_CERT: /run/secrets/fleetdm-tls-cert
-  #     KOLIDE_SERVER_KEY: /run/secrets/fleetdm-tls-key
-  #     KOLIDE_LOGGING_JSON: 'true'
-  #     KOLIDE_OSQUERY_STATUS_LOG_PLUGIN: filesystem
-  #     KOLIDE_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
-  #     KOLIDE_OSQUERY_RESULT_LOG_PLUGIN: filesystem
-  #     KOLIDE_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
-  #   secrets:
-  #     - mysql-fleetdm-password
-  #     - fleetdm-jwt-key
-  #     - fleetdm-tls-cert
-  #     - fleetdm-tls-key
-  #   volumes: 
-  #     - fleet-logs:/var/log/osquery
-  #   networks: 
-  #     - fleet-backend
-  #   depends_on:
-  #     - mysql
-  #     - redis
-  #   # healthcheck:
-  #   #   test: 'CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1'
-  #   #   interval: 1m30s
-  #   #   timeout: 10s
-  #   #   retries: 3
-  #   #   start_period: 40s
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 3
-  #     resources:
-  #       limits:
-  #         cpus: '2'
-  #         memory: 100M
-  #       reservations:
-  #         cpus: '0.5'
-  #         memory: 50M
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 5
-  #       window: 120s
   
   ############################################## MySQL ##############################################
   mysql:

@@ -131,3 +131,15 @@
     name: fleetdm
     state: restarted
     enabled: yes
+
+- name: Vault healthcheck
+  uri:
+    url: "https://127.0.0.1:8080"
+    follow_redirects: none
+    method: GET
+    validate_certs: 'no'
+    remote_src: yes
+  register: _result
+  until: _result.status == 200
+  retries: 720 # 720 * 5 seconds = 1hour (60*60/5)
+  delay: 5 # Every 5 seconds
