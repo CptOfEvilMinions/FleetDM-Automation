@@ -18,9 +18,9 @@
     port: '443'
     proto: tcp
 
-- name: NGINX healthcheck
+- name: NGINX + UFW healthcheck
   uri:
-    url: "https://{{ ansible_default_ipv4.address }}:443"
+    url: "https://{{ ansible_default_ipv4.address }}:443/setup"
     follow_redirects: none
     method: GET
     validate_certs: 'no'

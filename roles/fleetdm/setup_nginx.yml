@@ -28,9 +28,9 @@
     state: restarted
     enabled: yes
 
-- name: NGINX healthcheck
+- name: NGINX loopback healthcheck
   uri:
-    url: "https://{{ ansible_default_ipv4.address }}:443"
+    url: "https://127.0.0.1:443/setup"
     follow_redirects: none
     method: GET
     validate_certs: 'no'
