@@ -1,5 +1,7 @@
 # FleetDM automation with Ansible and Docker
 
+FleetDM-Automation is a repo containing Ansible and Docker code to setup FleetDM. For a complete setup guide see my [blog post here](https://holdmybeersecurity.com/2021/01/07/getting-started-with-fleetdm-v3-6-0/).
+
 ## Generate OpenSSL keys
 This project contains with a self-signed OpenSSL ceretificate which should ONLY BE used for testing. Below are instructions to make your own
 1. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout conf/tls/<name>.key -out conf/tls/<name>.crt`
@@ -21,7 +23,7 @@ This project has a pre-defined JWT key of `super_secret_key_here` which should O
 1. `docker service logs -f fleetdm_fleet`
 
 ## Ansible
-1. `vim hosts.yml` and add IP address under `[fleetdm]`
+1. `vim hosts.ini` and add IP address under `[fleetdm]`
 1. `vim all.yml` and set:
     1. `base_domain` - The domain for your network and the base domain of the FQDN
     1. `timezone` - OPTIONAL - Change the default timezone of UTC +0
@@ -35,7 +37,7 @@ This project has a pre-defined JWT key of `super_secret_key_here` which should O
 
 
 ## Versions supported
-* `Fleet FleetDM v3.5.2`
+* `Fleet FleetDM v3.6.0+`
 * `Ansible v2.11+`
 * `Ubuntu server 20.04`
 
@@ -47,3 +49,12 @@ This project has a pre-defined JWT key of `super_secret_key_here` which should O
 * [docker service logs](https://docs.docker.com/engine/reference/commandline/service_logs/)
 * [Use Docker Secrets With MySQL on Docker Swarm](https://blog.ruanbekker.com/blog/2017/11/23/use-docker-secrets-with-mysql-on-docker-swarm/)
 * [Configuring The Fleet Binary](https://github.com/fleetdm/fleet/blob/master/docs/infrastructure/configuring-the-fleet-binary.md)
+* [StackOverFlow - Using multiple delimiters in awk](https://stackoverflow.com/questions/12204192/using-multiple-delimiters-in-awk)
+* [Disable IPv6 in nginx proxy_pass](https://serverfault.com/questions/527317/disable-ipv6-in-nginx-proxy-pass)
+* [ansible.builtin.lineinfile – Manage lines in text files](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html)
+* [Redirect HTTP to HTTPS in Nginx](https://linuxize.com/post/redirect-http-to-https-in-nginx/)
+* [Serving Requests on IPv6 with Nginx.](https://bubblin.io/blog/ipv6-nginx)
+* [Nginx 1.4.0 is not binding to IPv4 with [::]:80 on Ubuntu 13.04 when net.ipv6.bindv6only is set to false](https://trac.nginx.org/nginx/ticket/345)
+* [Using multiple delimiters in awk](https://stackoverflow.com/questions/12204192/using-multiple-delimiters-in-awk)
+* [Disable ipv6 on Ubuntu 20.04](https://www.geekpills.com/operating-system/linux/disable-ipv6-on-ubuntu-20-04)
+* [How to Disable IPv6 on Ubuntu Linux](https://itsfoss.com/disable-ipv6-ubuntu-linux/)
