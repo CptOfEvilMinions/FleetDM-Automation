@@ -71,7 +71,7 @@ services:
   
   ############################################## fleet with ENV vars ##############################################
   fleet:
-    image: fleetdm/fleet:3.6.0
+    image: fleetdm/fleet:3.7.1
     command: sh -c "/usr/bin/fleet prepare db && /usr/bin/fleet serve"
     environment:
       KOLIDE_MYSQL_ADDRESS: mysql:3306
