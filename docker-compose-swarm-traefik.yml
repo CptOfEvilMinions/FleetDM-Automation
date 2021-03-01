@@ -1,43 +1,15 @@
-version: '3.7'
+version: '3.9'
 services:
-  ############################################## NGINX ##############################################
-  nginx:
-    image: nginx:1.19.5-alpine
-    configs:
-      - source: nginx-config
-        target: /etc/nginx/nginx.conf
-      - source: nginx-fleetdm-config
-        target: /etc/nginx/conf.d/fleet.conf
-    secrets:
-      - fleetdm-tls-cert
-      - fleetdm-tls-key
-    ports: 
-      - 8080:80
-      - 8444:443
-    networks: 
-      - default
-      - fleet-backend
-    depends_on: 
-      - fleet
-    deploy:
-      resources:
-        limits:
-          #cpus: '1'
-          memory: 150M
-        reservations:
-          #cpus: '0.25'
-          memory: 100M
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 50
-        window: 120s
-
-
   ############################################## fleet with config ##############################################
   fleet:
     image: fleetdm/fleet:3.8.0
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fleet.rule=Host(`fleet.hackinglab.local`)"
+      - "traefik.http.routers.fleet.tls=true"
+      - "traefik.docker.network=traefik_traefik-net"
+      - "traefik.http.services.fleet.loadbalancer.server.port=8080"
     configs:
       - source: fleetdm-config
         target: /etc/fleet/fleet.yml
@@ -49,13 +21,14 @@ services:
     volumes: 
       - fleet-logs:/var/log/osquery
     networks: 
+      - traefik_traefik-net
       - fleet-backend
     depends_on:
       - mysql
       - redis
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
       resources:
         limits:
           #cpus: '2'
@@ -68,53 +41,6 @@ services:
         delay: 5s
         max_attempts: 10
         window: 120s
-  
-  ############################################## fleet with ENV vars ##############################################
-  # fleet:
-  #   image: fleetdm/fleet:3.7.1
-  #   command: sh -c "/usr/bin/fleet prepare db && /usr/bin/fleet serve"
-  #   environment:
-  #     KOLIDE_MYSQL_ADDRESS: mysql:3306
-  #     KOLIDE_MYSQL_DATABASE: fleet
-  #     KOLIDE_MYSQL_USERNAME: fleet
-  #     KOLIDE_MYSQL_PASSWORD_PATH: /run/secrets/mysql-fleetdm-password
-  #     KOLIDE_REDIS_ADDRESS: redis:6379
-  #     KOLIDE_SERVER_ADDRESS: 0.0.0.0:8080
-  #     KOLIDE_AUTH_JWT_KEY_PATH: /run/secrets/fleetdm-jwt-key
-  #     KOLIDE_SERVER_CERT: /run/secrets/fleetdm-tls-cert
-  #     KOLIDE_SERVER_KEY: /run/secrets/fleetdm-tls-key
-  #     KOLIDE_LOGGING_JSON: 'true'
-  #     #KOLIDE_OSQUERY_STATUS_LOG_PLUGIN: filesystem
-  #     #KOLIDE_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
-  #     #KOLIDE_OSQUERY_RESULT_LOG_PLUGIN: filesystem
-  #     #KOLIDE_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
-  #   secrets:
-  #     - mysql-fleetdm-password
-  #     - fleetdm-jwt-key
-  #     - fleetdm-tls-cert
-  #     - fleetdm-tls-key
-  #   volumes: 
-  #     - fleet-logs:/var/log/osquery
-  #   networks: 
-  #     - fleet-backend
-  #   depends_on:
-  #     - mysql
-  #     - redis
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 3
-  #     resources:
-  #       limits:
-  #         #cpus: '2'
-  #         memory: 100M
-  #       reservations:
-  #         #cpus: '0.5'
-  #         memory: 50M
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 10
-  #       window: 120s
   
   ############################################## MySQL ##############################################
   mysql:
@@ -171,6 +97,8 @@ volumes:
 
 networks:
   fleet-backend:
+  traefik_traefik-net:
+    external: true
 
 configs:
   nginx-config:
@@ -180,7 +108,7 @@ configs:
   mysql-fleetdm-config:
     file: ./conf/docker/mysql/fleetdm.cnf
   fleetdm-config:
-    file: ./conf/docker/fleetdm/fleetdm-swarm.yml
+    file: ./conf/docker/fleetdm/fleetdm-swarm-traefik.yml
 
 secrets:
   mysql-root-password:
