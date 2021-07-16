@@ -6,11 +6,12 @@ ARG FLEETDM_MYSQL_PASSWORD
 ARG FLEETDM_MYSQL_DATABASE
 ARG FLEETDM_JWT_KEY
 
-# Create a group and user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
 # Create fleet config dir
+USER root
 RUN mkdir -p /etc/fleet/tls
+COPY conf/tls/*.crt /etc/fleet/tls/fleet.crt
+COPY conf/tls/*.key /etc/fleet/tls/fleet.key
+
 
 # Copy fleet config
 COPY conf/docker/fleetdm/fleetdm.yml /etc/fleet/fleet.yml
@@ -19,11 +20,6 @@ RUN sed -i "s/fleet_db_password/${FLEETDM_MYSQL_PASSWORD}/g" /etc/fleet/fleet.ym
 RUN sed -i "s/fleet_db_name/${FLEETDM_MYSQL_DATABASE}/g" /etc/fleet/fleet.yml
 RUN sed -i "s/fleetdm_jwt_key/${FLEETDM_JWT_KEY}/g" /etc/fleet/fleet.yml
 
-# Copy TLS certs
-COPY conf/tls/*.crt /etc/fleet/tls/fleet.crt
-COPY conf/tls/*.key /etc/fleet/tls/fleet.key
-
-USER appuser
 EXPOSE 8080
-
+USER fleet
 CMD ["fleet", "serve", "--config", "/etc/fleet/fleet.yml"]

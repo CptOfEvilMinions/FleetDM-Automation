@@ -1,8 +1,8 @@
-version: '3.7'
+version: '3.9'
 services:
   ############################################## NGINX ##############################################
   nginx:
-    image: nginx:1.19.5-alpine
+    image: nginx:1.20.1-alpine
     configs:
       - source: nginx-config
         target: /etc/nginx/nginx.conf
@@ -12,8 +12,8 @@ services:
       - fleetdm-tls-cert
       - fleetdm-tls-key
     ports: 
-      - 8080:80
-      - 8444:443
+      - 8000:80
+      - 8443:443
     networks: 
       - default
       - fleet-backend
@@ -22,10 +22,8 @@ services:
     deploy:
       resources:
         limits:
-          #cpus: '1'
           memory: 150M
         reservations:
-          #cpus: '0.25'
           memory: 100M
       restart_policy:
         condition: on-failure
@@ -33,10 +31,9 @@ services:
         max_attempts: 50
         window: 120s
 
-
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:3.8.0
+    image: fleetdm/fleet:v4.0.1
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
     configs:
       - source: fleetdm-config
@@ -58,10 +55,8 @@ services:
       replicas: 3
       resources:
         limits:
-          #cpus: '2'
           memory: 100M
         reservations:
-          #cpus: '0.5'
           memory: 50M
       restart_policy:
         condition: on-failure
@@ -137,10 +132,8 @@ services:
     deploy:
       resources:
         limits:
-          #cpus: '2'
           memory: 1G
         reservations:
-          #cpus: '1'
           memory: '300M'
       restart_policy:
         condition: on-failure
@@ -151,16 +144,14 @@ services:
 
   ############################################## Redis ##############################################
   redis:
-    image: redis:6.0.9-alpine
+    image: redis:6.2.4-alpine
     networks: 
       - fleet-backend
     deploy:
       resources:
         limits:
-          #cpus: '0.5'
           memory: 100M
         reservations:
-          #cpus: '0.5'
           memory: 50M
       restart_policy:
         condition: on-failure
