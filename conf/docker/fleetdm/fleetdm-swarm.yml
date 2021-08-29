@@ -7,8 +7,7 @@ redis:
   address: redis:6379
 server:
   address: 0.0.0.0:8080
-  cert: /run/secrets/fleetdm-tls-cert
-  key: /run/secrets/fleetdm-tls-key
+  tls: false
 auth:
   jwt_key_path: /run/secrets/fleetdm-jwt-key
 filesystem:

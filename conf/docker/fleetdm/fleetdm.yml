@@ -7,8 +7,7 @@ redis:
   address: redis:6379
 server:
   address: 0.0.0.0:8080
-  cert: /etc/fleet/tls/fleet.crt
-  key: /etc/fleet/tls/fleet.key
+  tls: false
 auth:
   jwt_key: fleetdm_jwt_key
 filesystem:

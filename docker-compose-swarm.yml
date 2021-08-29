@@ -2,7 +2,7 @@ version: '3.9'
 services:
   ############################################## NGINX ##############################################
   nginx:
-    image: nginx:1.20.1-alpine
+    image: nginx:1.21.1-alpine
     configs:
       - source: nginx-config
         target: /etc/nginx/nginx.conf
@@ -33,7 +33,7 @@ services:
 
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:v4.0.1
+    image: fleetdm/fleet:v4.2.3
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
     configs:
       - source: fleetdm-config
@@ -43,8 +43,6 @@ services:
       - fleetdm-jwt-key
       - fleetdm-tls-cert
       - fleetdm-tls-key
-    volumes: 
-      - fleet-logs:/var/log/osquery
     networks: 
       - fleet-backend
     depends_on:
@@ -66,30 +64,28 @@ services:
   
   ############################################## fleet with ENV vars ##############################################
   # fleet:
-  #   image: fleetdm/fleet:3.7.1
+  #   image: fleetdm/fleet:v4.2.3
   #   command: sh -c "/usr/bin/fleet prepare db && /usr/bin/fleet serve"
   #   environment:
-  #     KOLIDE_MYSQL_ADDRESS: mysql:3306
-  #     KOLIDE_MYSQL_DATABASE: fleet
-  #     KOLIDE_MYSQL_USERNAME: fleet
-  #     KOLIDE_MYSQL_PASSWORD_PATH: /run/secrets/mysql-fleetdm-password
-  #     KOLIDE_REDIS_ADDRESS: redis:6379
-  #     KOLIDE_SERVER_ADDRESS: 0.0.0.0:8080
-  #     KOLIDE_AUTH_JWT_KEY_PATH: /run/secrets/fleetdm-jwt-key
-  #     KOLIDE_SERVER_CERT: /run/secrets/fleetdm-tls-cert
-  #     KOLIDE_SERVER_KEY: /run/secrets/fleetdm-tls-key
-  #     KOLIDE_LOGGING_JSON: 'true'
-  #     #KOLIDE_OSQUERY_STATUS_LOG_PLUGIN: filesystem
-  #     #KOLIDE_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
-  #     #KOLIDE_OSQUERY_RESULT_LOG_PLUGIN: filesystem
-  #     #KOLIDE_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
+  #     FLEET_MYSQL_ADDRESS: mysql:3306
+  #     FLEET_MYSQL_DATABASE: fleet
+  #     FLEET_MYSQL_USERNAME: fleet
+  #     FLEET_MYSQL_PASSWORD_PATH: /run/secrets/mysql-fleetdm-password
+  #     FLEET_REDIS_ADDRESS: redis:6379
+  #     FLEET_SERVER_ADDRESS: 0.0.0.0:8080
+  #     FLEET_AUTH_JWT_KEY_PATH: /run/secrets/fleetdm-jwt-key
+  #     FLEET_SERVER_CERT: /run/secrets/fleetdm-tls-cert
+  #     FLEET_SERVER_KEY: /run/secrets/fleetdm-tls-key
+  #     FLEET_LOGGING_JSON: 'true'
+  #     #FLEET_OSQUERY_STATUS_LOG_PLUGIN: filesystem
+  #     #FLEET_FILESYSTEM_STATUS_LOG_FILE: /var/log/osquery/status.log
+  #     #FLEET_OSQUERY_RESULT_LOG_PLUGIN: filesystem
+  #     #FLEET_FILESYSTEM_RESULT_LOG_FILE: /var/log/osquery/result.log
   #   secrets:
   #     - mysql-fleetdm-password
   #     - fleetdm-jwt-key
   #     - fleetdm-tls-cert
   #     - fleetdm-tls-key
-  #   volumes: 
-  #     - fleet-logs:/var/log/osquery
   #   networks: 
   #     - fleet-backend
   #   depends_on:
@@ -144,7 +140,7 @@ services:
 
   ############################################## Redis ##############################################
   redis:
-    image: redis:6.2.4-alpine
+    image: redis:6.2.5-alpine
     networks: 
       - fleet-backend
     deploy:
