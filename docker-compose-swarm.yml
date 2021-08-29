@@ -50,7 +50,7 @@ services:
       - redis
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
       resources:
         limits:
           memory: 100M
@@ -93,7 +93,7 @@ services:
   #     - redis
   #   deploy:
   #     mode: replicated
-  #     replicas: 3
+  #     replicas: 1
   #     resources:
   #       limits:
   #         #cpus: '2'
