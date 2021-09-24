@@ -1,0 +1,3 @@
+.vagrant/
+group_vars/
+roles/
