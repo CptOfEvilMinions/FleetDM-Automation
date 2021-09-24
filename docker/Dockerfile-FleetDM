@@ -21,7 +21,7 @@ RUN mkdir /var/log/osquery && \
 	chown root:root /var/log/osquery && \
 	touch /var/log/osquery/status.log && \
 	touch /var/log/osquery/result.log && \
-	chown fleet:fleet /var/log/osquery/status.log && \
+	chown fleet:fleet /var/log/osquery/result.log && \
 	chown fleet:fleet /var/log/osquery/status.log
 
 EXPOSE 8080

@@ -2,7 +2,7 @@ version: '3.9'
 services:
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:v4.2.3
+    image: fleetdm/fleet:v4.3.1
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
     labels:
       - "traefik.enable=true"
