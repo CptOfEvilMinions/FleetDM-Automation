@@ -1,11 +1,6 @@
 ####################################################################
 # Install Fleetdm
 ####################################################################
-- name: Install unzip
-  apt:
-    name: ['unzip']
-    state: latest
-
 - name: Create Fleet group
   group:
     name: 'fleetdm'
@@ -38,11 +33,12 @@
     src: /tmp/fleet.zip
     dest: /tmp/fleetdm
     remote_src: true
+    extra_opts: [--strip-components=1]
   when: not fleetdm_install.stat.exists
 
 - name: Copy Fleetdm Fleet binary
   copy:
-    src: /tmp/fleetdm/linux/fleet
+    src: /tmp/fleetdm/fleet
     dest: /usr/local/bin/fleet
     remote_src: true
     owner: root
