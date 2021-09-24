@@ -1,4 +1,4 @@
-- hosts: fleetdm
+- hosts: "{{ variable_host | default('elastic', true) }}"
   become: yes
   become_user: root
   tasks:

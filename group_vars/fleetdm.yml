@@ -1,7 +1,7 @@
 ####################################### FleetDM #######################################
 hostname: 'fleetdm'
-fleetdm_version: 3.5.1
-fleetdm_dl_url: 'https://github.com/fleetdm/fleet/releases/download/{{ fleetdm_version }}/fleet.zip'
+fleetdm_version: 4.2.3
+fleetdm_dl_url: 'https://github.com/fleetdm/fleet/releases/download/fleet-v{{ fleetdm_version }}/fleet_v{{ fleetdm_version }}_linux.tar.gz'
 
 fleetdm_jwt: 'super_secret_key_here'
 
