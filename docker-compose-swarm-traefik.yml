@@ -2,7 +2,7 @@ version: '3.9'
 services:
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:v4.3.1
+    image: fleetdm/fleet:v4.7.0
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
     labels:
       - "traefik.enable=true"
@@ -40,7 +40,7 @@ services:
   
   ############################################## MySQL ##############################################
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.27
     configs:
       - source: mysql-fleetdm-config
         target: /etc/mysql/conf.d/fleetdm.cnf
@@ -71,7 +71,7 @@ services:
 
   ############################################## Redis ##############################################
   redis:
-    image: redis:6.2.5-alpine
+    image: redis:6.2.6-alpine
     networks: 
       - fleet-backend
     deploy:

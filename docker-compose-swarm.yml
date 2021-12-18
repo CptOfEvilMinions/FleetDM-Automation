@@ -2,7 +2,7 @@ version: '3.9'
 services:
   ############################################## NGINX ##############################################
   nginx:
-    image: nginx:1.21.3-alpine
+    image: nginx:1.21.4-alpine
     configs:
       - source: nginx-config
         target: /etc/nginx/nginx.conf
@@ -33,7 +33,7 @@ services:
 
   ############################################## fleet with config ##############################################
   fleet:
-    image: fleetdm/fleet:v4.3.1
+    image: fleetdm/fleet:v4.7.0
     command: sh -c "/usr/bin/fleet prepare db --config /etc/fleet/fleet.yml && /usr/bin/fleet serve --config /etc/fleet/fleet.yml"
     configs:
       - source: fleetdm-config
@@ -64,7 +64,7 @@ services:
   
   ############################################## fleet with ENV vars ##############################################
   # fleet:
-  #   image: fleetdm/fleet:v4.3.1
+  #   image: fleetdm/fleet:v4.7.0
   #   command: sh -c "/usr/bin/fleet prepare db && /usr/bin/fleet serve"
   #   environment:
   #     FLEET_MYSQL_ADDRESS: mysql:3306
@@ -109,7 +109,7 @@ services:
   
   ############################################## MySQL ##############################################
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.27
     configs:
       - source: mysql-fleetdm-config
         target: /etc/mysql/conf.d/fleetdm.cnf
@@ -140,7 +140,7 @@ services:
 
   ############################################## Redis ##############################################
   redis:
-    image: redis:6.2.5-alpine
+    image: redis:6.2.6-alpine
     networks: 
       - fleet-backend
     deploy:
