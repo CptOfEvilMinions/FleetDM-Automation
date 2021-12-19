@@ -1,7 +1,7 @@
 #########################################################
-# Get Kolide public certificate
+# Get FleetDM public certificate
 #########################################################
-- name:  Get Kolide public certificate
+- name:  Get FleetDM public certificate
   community.crypto.get_certificate:
     host: "{{ fleetdm_fqdn }}"
     port: "{{ fleetdm_port }}"
@@ -12,11 +12,11 @@
     fleetdm_public_cert: "{{ cert.cert }}"
 
 #########################################################
-# Get Osquery enroll secret from Kolide
+# Get Osquery enroll secret from FleetDM
 #########################################################
-- name: Get Osquery enrollment secret from Kolide
+- name: Get Osquery enrollment secret from FleetDM
   uri:
-    url: "https://{{ fleetdm_fqdn }}:{{ fleetdm_port }}/api/v1/kolide/spec/enroll_secret"
+    url: "https://{{ fleetdm_fqdn }}:{{ fleetdm_port }}/api/v1/fleet/spec/enroll_secret"
     method: GET
     return_content: yes
     validate_certs: no
@@ -25,4 +25,4 @@
   register: enroll_secret
 
 - set_fact:
-    osquery_enroll_secret: "{{ enroll_secret.json.specs.secrets[0].secret }}"
+    osquery_enroll_secret: "{{ enroll_secret.json.spec.secrets[0].secret }}"

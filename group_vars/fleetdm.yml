@@ -1,12 +1,12 @@
 ####################################### FleetDM #######################################
-hostname: 'fleetdm'
+hostname: 'fleet'
 fleetdm_version: 4.7.0
 fleetdm_dl_url: 'https://github.com/fleetdm/fleet/releases/download/fleet-v{{ fleetdm_version }}/fleet_v{{ fleetdm_version }}_linux.tar.gz'
 
 fleetdm_jwt: 'super_secret_key_here'
 
 fleetdm_fqdn: '{{ hostname }}.{{ base_domain }}'
-fleetdm_port: 443
+fleetdm_port: 8443
 
 ####################################### MySQL #######################################
 mysql_version: '8.0.27'

@@ -11,12 +11,12 @@
     repo: "{{ osquery_repo_url }}"
     state: present
 
-- name: Install Osquery
+- name: Install Osquery v{{ osquery_version }}
   apt:
-    name: 'osquery-{{ osquery_version }}'
+    name: 'osquery={{ osquery_version }}-1.linux'
     state: present
 
-- name: Write Kolide public certificate contents to disk
+- name: Write FleetDM public certificate contents to disk
   copy:
     content: "{{ fleetdm_public_cert }}"
     dest: "/etc/osquery/fleetdm.crt"
