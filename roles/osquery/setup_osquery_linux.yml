@@ -13,7 +13,7 @@
 
 - name: Install Osquery
   apt:
-    name: osquery
+    name: 'osquery-{{ osquery_version }}'
     state: present
 
 - name: Write Kolide public certificate contents to disk

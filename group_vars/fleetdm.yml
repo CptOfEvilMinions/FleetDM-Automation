@@ -5,7 +5,11 @@ fleetdm_dl_url: 'https://github.com/fleetdm/fleet/releases/download/fleet-v{{ fl
 
 fleetdm_jwt: 'super_secret_key_here'
 
-mysql_version: '8.0'
+fleetdm_fqdn: '{{ hostname }}.{{ base_domain }}'
+fleetdm_port: 443
+
+####################################### MySQL #######################################
+mysql_version: '8.0.27'
 mysql_root_password: 'Changeme123!'
 
 mysql_fleetdm_db_name: 'fleetdm'
@@ -13,5 +17,6 @@ mysql_fleetdm_username: 'fleetdm'
 mysql_fleetdm_password: 'Changeme123!'
 mysql_fleetdm_acl: 'localhost'
 
-fleetdm_fqdn: '{{ hostname }}.{{ base_domain }}'
-fleetdm_port: 443
+####################################### Redis #######################################
+redis_version: '6:6.2.6-2rl1~focal1'
+redis_repo_url: 'ppa:redislabs/redis'
