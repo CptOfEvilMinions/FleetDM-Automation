@@ -19,7 +19,7 @@
 - name: Download Fleetdm
   get_url:
     url: '{{ fleetdm_dl_url }}'
-    dest: /tmp/fleet.zip
+    dest: /tmp/fleet.tar
   when: not fleetdm_install.stat.exists
 
 - name: Create temporary unzip directory
@@ -30,7 +30,7 @@
 
 - name: Unarchive Fleetdm
   unarchive:
-    src: /tmp/fleet.zip
+    src: /tmp/fleet.tar
     dest: /tmp/fleetdm
     remote_src: true
     extra_opts: [--strip-components=1]
@@ -130,7 +130,7 @@
 
 - name: FleetDM healthcheck
   uri:
-    url: "https://127.0.0.1:8080/setup"
+    url: "http://127.0.0.1:8080/setup"
     follow_redirects: none
     method: GET
     validate_certs: 'no'

@@ -7,8 +7,7 @@ redis:
   address: 127.0.0.1:6379
 server:
   address: 127.0.0.1:8080
-  cert: /etc/ssl/certs/fleetdm.crt
-  key: /etc/ssl/private/fleetdm.key
+  tls: false
 auth:
   jwt_key: '{{ fleetdm_jwt }}'
 filesystem:
