@@ -48,7 +48,7 @@ jobs:
 
       - name: CURL Osquery enroll token
         run: |
-          mkdir -p /etc/osquery
+          sudo mkdir -p /etc/osquery
           fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /etc/osquery/osquery.key
 
       - name: Install Osquery
