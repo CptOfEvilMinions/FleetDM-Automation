@@ -48,8 +48,8 @@ jobs:
 
       - name: Install Osquery
         run:
-          curl https://github.com/osquery/osquery/releases/download/$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb --output /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
-          dpkg -i /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
+          curl -L https://github.com/osquery/osquery/releases/download/$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb --output /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
+          sudo dpkg -i /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
 
       - name: Get Osquery enroll token
         run: |
