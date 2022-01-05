@@ -78,6 +78,12 @@ jobs:
         run: |
           fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
           fleetctl get hosts
+          until fleetctl get hosts | grep $(hostname)
+          do
+            echo "[*] - waiting for osquery agent to come online"
+            sleep 3
+          done
+          fleetctl get hosts
           export osq_query="select hostname from system_info;"
           fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
           [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
