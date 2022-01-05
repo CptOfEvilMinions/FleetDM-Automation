@@ -62,7 +62,6 @@ jobs:
           echo '127.0.0.1 fleet.hackinglab.local' | sudo tee -a /etc/hosts
           sudo cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
           sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
-          sed -i 's/--logger_plugin=tls/--logger_plugin=tls,filesystem/g' osquery.flags
 
       - name: Start OsqueryD in background
         run: |
