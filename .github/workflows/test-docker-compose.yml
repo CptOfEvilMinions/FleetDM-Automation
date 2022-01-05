@@ -35,8 +35,11 @@ jobs:
       - name: Run docker-compose
         run: 'docker-compose up -d'
 
-      - name: Download FleetCLI
-        run: curl -L -s https://github.com/fleetdm/fleet/releases/download/fleet-v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip --output /tmp/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip
+      - name: Download AND UNZIP FleetCLI
+        run: |
+          curl -L -s https://github.com/fleetdm/fleet/releases/download/fleet-v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip --output /tmp/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip
+          unzip /tmp/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip
+          mv fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux/fleetctl /usr/local/bin/fleetctl
 
       - name: FleetCLI setup Fleet server
         run: |
