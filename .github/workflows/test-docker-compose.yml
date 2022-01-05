@@ -57,12 +57,18 @@ jobs:
           fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /tmp/osquery.key
           sudo mv /tmp/osquery.key /etc/osquery/osquery.key
 
+      - name: Configure Osquery
+        run: |
+          sudo echo '127.0.0.1 fleet.hackinglab.local' >> /etc/hosts
+          cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
+          sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
+
       - name: Start OsqueryD in background
         run: |
           $(which osqueryi) --daemonize --flagfile conf/osquery/osquery_linux.flags
 
-
       - name: Run query on Osquery agent
         run: |
+          $(which osqueryi) "select hostname from system_info;"
           fleetctl query --query 'select hostname from system_info;' --labels='All Hosts' > results.json
           [[ "$(hostname)" == "$(cat results.json | grep hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
