@@ -47,7 +47,7 @@ jobs:
           fleetctl setup --email admin@hackinglab.local --name 'Sherlock Holmes' --org-name 'Hackinglab' --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
 
       - name: Install Osquery
-        run:
+        run: |
           export OSQUERY_VERSION=$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs) 
           curl -L https://github.com/osquery/osquery/releases/download/${OSQUERY_VERSION}/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb --output /tmp/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb
           sudo dpkg -i /tmp/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb
