@@ -86,4 +86,4 @@ jobs:
 
           export osq_query="select computer_name from system_info;"
           fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
-          [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].host_hostname)" ]] && echo "Equal" && exit 0 || echo "Not equal" && exit 1
+          [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].computer_name)" ]] && echo "Equal" && exit 0 || echo "Not equal" && exit 1
