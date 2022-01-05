@@ -59,7 +59,7 @@ jobs:
 
       - name: Configure Osquery
         run: |
-          sudo echo '127.0.0.1 fleet.hackinglab.local' >> /etc/hosts
+          echo '127.0.0.1 fleet.hackinglab.local' | sudo tee -a /etc/hosts
           cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
           sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
 
