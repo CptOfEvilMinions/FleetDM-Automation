@@ -76,6 +76,6 @@ jobs:
         run: |
           fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
           export osq_query="select hostname from system_info;"
-          fleetctl query --query '${osq_query}' --labels='All Hosts' --quiet > results.json
+          fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet > results.json
           cat results.json
           [[ "$(hostname)" == "$(cat results.json | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
