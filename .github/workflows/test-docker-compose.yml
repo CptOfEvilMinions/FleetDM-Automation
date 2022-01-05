@@ -63,11 +63,11 @@ jobs:
           sudo cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
           sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
           sed -i 's/--logger_plugin=tls/--logger_plugin=filesystem,tls/g' conf/osquery/osquery_linux.flags
-          cp conf/osquery/osquery_linux.flags /etc/osquery/osquery.flags
+          sudo cp conf/osquery/osquery_linux.flags /etc/osquery/osquery.flags
 
       - name: Start OsqueryD in background
         run: |
-          service osqueryd restart
+          sudo service osqueryd restart
           sleep 10
 
       - name: Run query on Osquery agent
