@@ -37,7 +37,7 @@ This project has a pre-defined JWT key of `super_secret_key_here` which should O
 
 
 ## Versions supported
-* `Fleet FleetDM v3.6.0+`
+* `Fleet FleetDM v4.8.0+`
 * `Ansible v2.11+`
 * `Ubuntu server 20.04`
 
