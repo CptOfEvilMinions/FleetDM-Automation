@@ -70,6 +70,7 @@ jobs:
 
       - name: Run query on Osquery agent
         run: |
+          ps aux | grep osq
           sudo apt install jq -y
           $(which osqueryi) "select hostname from system_info;"
       
