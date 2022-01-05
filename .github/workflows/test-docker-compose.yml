@@ -68,24 +68,22 @@ jobs:
       - name: Start OsqueryD in background
         run: |
           sudo service osqueryd restart
-          sleep 10
-
-      - name: Run query on Osquery agent
-        run: |
-          ps aux | grep osq
-          sudo apt install jq -y
-          $(which osqueryi) "select hostname from system_info;"
+          sleep 10          
       
       - name: Compare result from query
         run: |
-          fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
-          fleetctl get hosts
-          until fleetctl get hosts | grep $(hostname)
+          sudo apt install jq -y
+          echo -e "Osquery hostname: \n$(/usr/local/bin/osqueryi 'select hostname from system_info;')"
+          echo "Hostname command: $(hostname)"
+
+          fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')          
+          until fleetctl get hosts | grep $(hostname) | grep online
           do
-            echo "[*] - waiting for osquery agent to come online"
+            echo "[*] - $(date) - Waiting for osquery agent to come online"
             sleep 3
           done
-          fleetctl get hosts
+          echo "[*] - $(date) - Osquery agent is online"
+
           export osq_query="select hostname from system_info;"
           fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
           [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
