@@ -62,10 +62,12 @@ jobs:
           echo '127.0.0.1 fleet.hackinglab.local' | sudo tee -a /etc/hosts
           sudo cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
           sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
-          
+          sed -i 's/--logger_plugin=tls/--logger_plugin=filesystem,tls/g' conf/osquery/osquery_linux.flags
+          cp conf/osquery/osquery_linux.flags /etc/osquery/osquery.flags
+
       - name: Start OsqueryD in background
         run: |
-          sudo /opt/osquery/bin/osqueryd --daemonize --flagfile conf/osquery/osquery_linux.flags --verbose
+          service osqueryd restart
           sleep 10
 
       - name: Run query on Osquery agent
@@ -87,9 +89,3 @@ jobs:
           export osq_query="select hostname from system_info;"
           fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
           [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
-
-
-          fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet > results.json
-          cat results.json
-          [[ "$(hostname)" == "$(cat results.json | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
-
