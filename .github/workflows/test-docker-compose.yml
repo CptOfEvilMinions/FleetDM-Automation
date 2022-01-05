@@ -71,5 +71,9 @@ jobs:
         run: |
           sudo apt install jq -y
           $(which osqueryi) "select hostname from system_info;"
+      
+      - name: Compare result from query
+        run: |
           fleetctl query --query 'select hostname from system_info;' --labels='All Hosts' > results.json
+          cat results.json
           [[ "$(hostname)" == "$(cat results.json | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
