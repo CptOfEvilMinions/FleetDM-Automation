@@ -65,10 +65,11 @@ jobs:
 
       - name: Start OsqueryD in background
         run: |
-          sudo $(which osqueryi) --daemonize --flagfile conf/osquery/osquery_linux.flags
+          sudo /opt/osquery/bin/osqueryd --daemonize --flagfile conf/osquery/osquery_linux.flags
 
       - name: Run query on Osquery agent
         run: |
+          sudo apt install jq -y
           $(which osqueryi) "select hostname from system_info;"
           fleetctl query --query 'select hostname from system_info;' --labels='All Hosts' > results.json
-          [[ "$(hostname)" == "$(cat results.json | grep hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
+          [[ "$(hostname)" == "$(cat results.json | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
