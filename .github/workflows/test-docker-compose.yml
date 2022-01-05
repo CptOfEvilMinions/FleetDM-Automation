@@ -47,7 +47,9 @@ jobs:
           fleetctl setup --email admin@hackinglab.local --name 'Sherlock Holmes' --org-name 'Hackinglab' --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
 
       - name: CURL Osquery enroll token
-        run: "fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /etc/osquery/osquery.key"
+        run: |
+          mkdir -p /etc/osquery
+          fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /etc/osquery/osquery.key
 
       - name: Install Osquery
         run:
