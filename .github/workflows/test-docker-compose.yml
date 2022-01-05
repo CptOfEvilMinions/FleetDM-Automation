@@ -46,19 +46,15 @@ jobs:
           fleetctl config set --address https://127.0.0.1:8443 --tls-skip-verify
           fleetctl setup --email admin@hackinglab.local --name 'Sherlock Holmes' --org-name 'Hackinglab' --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
 
-      - name: CURL Osquery enroll token
-        run: |
-          sudo mkdir -p /etc/osquery
-          fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /tmp/osquery.key
-          sudo mv /tmp/osquery.key /etc/osquery/osquery.key
-
       - name: Install Osquery
         run:
-          export OSQUERY_KEY=1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys $OSQUERY_KEY
-          sudo add-apt-repository 'deb [arch=amd64] https://pkg.osquery.io/deb deb main'
-          sudo apt-get update -y 
-          sudo apt-get install osquery=$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}')-1 -y
+          curl https://github.com/osquery/osquery/releases/download/$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb --output /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
+          dpkg -i /tmp/osquery_$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs)-1.linux_amd64.deb
+
+      - name: Get Osquery enroll token
+        run: |
+          fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /tmp/osquery.key
+          sudo mv /tmp/osquery.key /etc/osquery/osquery.key
 
       - name: Start OsqueryD in background
         run: |
