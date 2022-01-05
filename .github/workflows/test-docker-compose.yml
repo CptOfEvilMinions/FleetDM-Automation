@@ -66,6 +66,7 @@ jobs:
       - name: Start OsqueryD in background
         run: |
           sudo /opt/osquery/bin/osqueryd --daemonize --flagfile conf/osquery/osquery_linux.flags
+          sleep 10
 
       - name: Run query on Osquery agent
         run: |
@@ -75,6 +76,7 @@ jobs:
       - name: Compare result from query
         run: |
           fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
+          fleetctl get hosts
           export osq_query="select hostname from system_info;"
           fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
           [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].hostname)" ]] && echo "Equal" || echo "Not equal" && exit 1
