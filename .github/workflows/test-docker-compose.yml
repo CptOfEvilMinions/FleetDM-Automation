@@ -62,10 +62,10 @@ jobs:
           echo '127.0.0.1 fleet.hackinglab.local' | sudo tee -a /etc/hosts
           sudo cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
           sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
-
+          
       - name: Start OsqueryD in background
         run: |
-          sudo /opt/osquery/bin/osqueryd --flagfile conf/osquery/osquery_linux.flags --verbose
+          sudo /opt/osquery/bin/osqueryd --daemonize --flagfile conf/osquery/osquery_linux.flags --verbose
           sleep 10
 
       - name: Run query on Osquery agent
