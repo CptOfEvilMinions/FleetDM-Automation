@@ -27,6 +27,9 @@ jobs:
         run: |
           sed -i  "s?- import_tasks: 'roles/fleetdm/init.yml'?#- import_tasks: 'roles/fleetdm/init.yml'?g" deploy_fleetdm.yml
 
+      - name: apt-update
+        run: sudo apt-get update -y 
+        
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
