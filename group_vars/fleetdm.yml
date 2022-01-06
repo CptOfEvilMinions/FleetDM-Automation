@@ -9,7 +9,7 @@ fleetdm_fqdn: '{{ hostname }}.{{ base_domain }}'
 fleetdm_port: 8443
 
 ####################################### MySQL #######################################
-mysql_version: '8.0.27'
+mysql_version: '8.0'
 mysql_root_password: 'Changeme123!'
 
 mysql_fleetdm_db_name: 'fleetdm'
