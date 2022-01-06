@@ -23,9 +23,9 @@ jobs:
       - name: Generate TLS certs
         run: 'openssl req -x509 -new -nodes -keyout conf/tls/tls.key -out conf/tls/tls.crt -config conf/tls/tls.conf'
       
-      - name: Comment out roles/init.yml
+      - name: Comment out roles/fleetdm/init.yml
         run: |
-          sed -i  "s?- import_tasks: 'roles/init.yml'?#- import_tasks: 'roles/init.yml'?g" deploy_fleetdm.yml
+          sed -i  "s?- import_tasks: 'roles/fleetdm/init.yml''?#- import_tasks: 'roles/fleetdm/init.yml''?g" deploy_fleetdm.yml
 
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
