@@ -1,0 +1,95 @@
+name: Docker Swarm test
+
+on: 
+  # Only run when Splunk docker-compose changes
+  push:
+    paths:
+      - 'conf/docker/*'
+      - 'docker-compose-swarm.yml'
+
+  # Only run when PR is requesting to merge with main
+  pull_request:
+    branches:
+      - main
+
+jobs:  
+  test:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Docker Swarm init
+        run: sudo docker swarm init --advertise-addr 127.0.0.1
+      
+      - name: Generate TLS certs
+        run: 'openssl req -x509 -new -nodes -keyout conf/tls/fleet.key -out conf/tls/fleet.crt -config conf/tls/tls.conf'
+      
+      - name: Spin up Docker swarm stack for FleetDM
+        run: |
+          openssl rand -base64 32 | tr -cd '[:alnum:]' | docker secret create fleetdm-jwt-key -
+          openssl rand -base64 32 | tr -cd '[:alnum:]' | docker secret create mysql-root-password -
+          openssl rand -base64 32 | tr -cd '[:alnum:]' | docker secret create mysql-fleetdm-password -
+          docker stack deploy -c docker-compose-swarm.yml fleetdm
+
+      - name: Wait for FleetDM to start
+        run: |
+          until docker service logs fleetdm_fleet | grep '{"address":"0.0.0.0:8080","msg":"listening"'
+          do 
+            echo "[*] - Waiting on FleetDM"
+            sleep 3
+          done
+          echo "[+] - FleetDM has started"
+
+      - name: Download AND UNZIP FleetCLI
+        run: |
+          curl -L -s https://github.com/fleetdm/fleet/releases/download/fleet-v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip --output /tmp/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip
+          unzip /tmp/fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux.zip
+          mv fleetctl_v$(cat .env | grep FLEETDM_VERSION | awk -F= '{print $2}')_linux/fleetctl /usr/local/bin/fleetctl
+
+      - name: FleetCLI setup Fleet server
+        run: |
+          fleetctl config set --address https://127.0.0.1:8443 --tls-skip-verify
+          fleetctl setup --email admin@hackinglab.local --name 'Sherlock Holmes' --org-name 'Hackinglab' --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')
+
+      - name: Install Osquery
+        run: |
+          export OSQUERY_VERSION=$(cat .env | grep OSQUERY_VERSION | awk -F= '{print $2}' | xargs) 
+          curl -L https://github.com/osquery/osquery/releases/download/${OSQUERY_VERSION}/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb --output /tmp/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb
+          sudo dpkg -i /tmp/osquery_${OSQUERY_VERSION}-1.linux_amd64.deb
+
+      - name: Get Osquery enroll token
+        run: |
+          fleetctl get enroll_secret | grep 'secret: ' | awk -F: '{print $2}' | xargs > /tmp/osquery.key
+          sudo mv /tmp/osquery.key /etc/osquery/osquery.key
+
+      - name: Configure Osquery
+        run: |
+          echo '127.0.0.1 fleet.hackinglab.local' | sudo tee -a /etc/hosts
+          sudo cp conf/tls/fleet.crt /etc/osquery/fleetdm.crt
+          sed -i 's/{{ fleetdm_fqdn }}:{{ fleetdm_port }}/fleet.hackinglab.local:8443/g' conf/osquery/osquery_linux.flags
+          sed -i 's/--logger_plugin=tls/--logger_plugin=filesystem,tls/g' conf/osquery/osquery_linux.flags
+          sudo cp conf/osquery/osquery_linux.flags /etc/osquery/osquery.flags
+
+      - name: Start OsqueryD in background
+        run: |
+          sudo service osqueryd restart
+          sleep 10          
+      
+      - name: Compare result from query
+        run: |
+          sudo apt install jq -y
+          echo -e "Osquery hostname: \n$(/usr/local/bin/osqueryi 'select computer_name from system_info;')"
+          echo "Hostname command: $(hostname)"
+
+          fleetctl login --email admin@hackinglab.local --password $(cat .env | grep FLEETDM_MYSQL_PASSWORD | awk -F= '{print $2}')          
+          until fleetctl get hosts | grep $(hostname) | grep online
+          do
+            echo "[*] - $(date) - Waiting for osquery agent to come online"
+            sleep 3
+          done
+          echo "[*] - $(date) - Osquery agent is online"
+
+          export osq_query="select computer_name from system_info;"
+          fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet
+          [[ "$(hostname)" == "$( fleetctl query --query "${osq_query}" --labels='All Hosts' --quiet | jq -r .rows[0].computer_name)" ]] && echo "Equal" && exit 0 || echo "Not equal" && exit 1
