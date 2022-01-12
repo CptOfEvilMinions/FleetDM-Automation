@@ -30,7 +30,7 @@ jobs:
       - name: apt-update
         run: |
           sudo apt-get update -y 
-          sudo apt-get -f -y install -o Dpkg::Options::="--force-overwrite"
+          sudo apt-get install mysql-server-8.0 -y
         
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
