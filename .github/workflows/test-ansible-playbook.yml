@@ -36,7 +36,8 @@ jobs:
           sudo dpkg -l | grep -i mysql
           sudo apt-get clean
           sudo apt-get install -q -y mysql-server-$(cat group_vars/fleetdm.yml | grep mysql_version | awk -F':' '{print $2}' | tr -d "'" | xargs)
-        
+          mysql -u root -hlocalhost -S /var/run/mysqld/mysqld.sock -e "show databases; exit"
+          
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
