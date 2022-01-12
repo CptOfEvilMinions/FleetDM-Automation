@@ -30,6 +30,12 @@ jobs:
       - name: apt-update
         run: |
           sudo apt-get update -y 
+          sudo apt-get purge mysql\*
+          sudo rm -rf /var/lib/mysql
+          sudo rm -rf /etc/mysql
+          sudo dpkg -l | grep -i mysql
+          sudo apt-get clean
+          sudo updatedb
           sudo apt-get install mysql-server-8.0 -y
         
       - name: Run playbook
