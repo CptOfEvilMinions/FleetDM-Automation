@@ -4,13 +4,7 @@
 - name: Install MySQL v{{ mysql_version }}
   apt:
     name: [
-      'mysql-server-{{ mysql_version }}', 
-      'python3-mysqldb', 
-      'python3-pip',
-      'libmysqlclient21',
-      'mysql-client-{{ mysql_version }}',
-      'mysql-common'
-    ]
+      'mysql-server-{{ mysql_version }}', 'python3-mysqldb', 'python3-pip']
     state: present
 
 - name: Start MySQL service
@@ -33,13 +27,13 @@
     name: ''
     host_all: yes
     state: absent
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 - name: Remove the MySQL test database
   community.mysql.mysql_db:
     name: test
     state: absent
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 - name: Change root user 
   community.mysql.mysql_user: 
@@ -49,13 +43,14 @@
     password: '{{ mysql_root_password }}'
     priv: '*.*:ALL,GRANT'
     host_all: yes
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 ####################################################################
 # Setup FleetDM database
 ####################################################################
 - name: Create FleetDM database
   community.mysql.mysql_db:
+    login_host: '127.0.0.1'
     login_user: 'root'
     login_password: '{{ mysql_root_password }}'
     name: '{{ mysql_fleetdm_db_name }}'
