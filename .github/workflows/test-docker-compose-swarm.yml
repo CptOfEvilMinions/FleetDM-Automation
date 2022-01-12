@@ -34,7 +34,7 @@ jobs:
 
       - name: Wait for FleetDM to start
         run: |
-          until [ "$(curl -s -k -w '%{http_code}' -o /dev/null "https://10.150.100.210:8443/healthz")" -eq 200 ]
+          until [ "$(curl -s -k -w '%{http_code}' -o /dev/null "https://127.0.0.1:8443/healthz")" -eq 200 ]
           do 
             echo "[*] - Waiting on FleetDM"
             sleep 3
