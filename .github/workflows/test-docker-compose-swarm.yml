@@ -34,7 +34,7 @@ jobs:
 
       - name: Wait for FleetDM to start
         run: |
-          until docker service logs fleetdm_fleet | grep '{"address":"0.0.0.0:8080","msg":"listening"'
+          until curl -k -s -X GET https://127.0.0.1:8443/healthz
           do 
             echo "[*] - Waiting on FleetDM"
             sleep 3

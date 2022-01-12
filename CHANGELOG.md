@@ -13,6 +13,9 @@
 - Updated [.env](.env#L2) to use NGINX v1.21.5
 - Updated [.env](.env#L1) to use Fleet v4.8.0
 - Updated [.env](.env#L10) to use Osquery v5.0.1
+- Updated [docker-compose-swarm.yml](docker-compose-swarm.yml#L5) to use `nginx:1.21.5-alpine`
+- Updated [docker-compose-swarm.yml](docker-compose-swarm.yml#46) to use `fleetdm/fleet:v4.8.0`
+
 
 ### Bug Fixes
 
@@ -21,6 +24,7 @@
 ### CI/CD
 
 - Added GHA workflow to test changes to `docker-compose.yml`
+- Added GHA workflow to test changes to `docker-compose-swarm.yml`
 - Added GHA workflow to test changes to `deploy_fleetdm.yml`
 
 ### Documentation
