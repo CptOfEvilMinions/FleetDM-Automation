@@ -3,7 +3,14 @@
 ####################################################################
 - name: Install MySQL v{{ mysql_version }}
   apt:
-    name: ['mysql-server-{{ mysql_version }}', 'python3-mysqldb', 'python3-pip']
+    name: [
+      'mysql-server-{{ mysql_version }}', 
+      'python3-mysqldb', 
+      'python3-pip',
+      'libmysqlclient21',
+      'mysql-client-{{ mysql_version }}',
+      'mysql-common'
+    ]
     state: present
 
 - name: Start MySQL service
