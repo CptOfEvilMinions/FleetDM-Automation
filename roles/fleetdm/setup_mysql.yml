@@ -23,6 +23,7 @@
 
 - name: Removes all anonymous user accounts
   community.mysql.mysql_user:
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     name: ''
     host_all: yes
     state: absent
@@ -30,12 +31,14 @@
 
 - name: Remove the MySQL test database
   community.mysql.mysql_db:
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     name: test
     state: absent
   when: not mysql_root_login.failed
 
 - name: Change root user 
   community.mysql.mysql_user: 
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     login_user: root
     login_password: ''
     name: 'root'
