@@ -3,7 +3,7 @@
 ####################################################################
 - name: Install MySQL v{{ mysql_version }}
   apt:
-    name: ['mysql-server={{ mysql_version }}-0ubuntu0.20.04.1', 'python3-mysqldb', 'python3-pip']
+    name: ['mysql-server-{{ mysql_version }}', 'python3-mysqldb', 'python3-pip']
     state: present
 
 - name: Start MySQL service
@@ -18,37 +18,42 @@
 - name: Attempt to collect all possible information using passwordless root access
   community.mysql.mysql_info:
     login_user: root
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
   register: mysql_root_login
   ignore_errors: yes
 
 - name: Removes all anonymous user accounts
   community.mysql.mysql_user:
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     name: ''
     host_all: yes
     state: absent
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 - name: Remove the MySQL test database
   community.mysql.mysql_db:
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     name: test
     state: absent
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 - name: Change root user 
   community.mysql.mysql_user: 
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     login_user: root
     login_password: ''
     name: 'root'
     password: '{{ mysql_root_password }}'
     priv: '*.*:ALL,GRANT'
     host_all: yes
-  when: not mysql_root_login.failed == true
+  when: not mysql_root_login.failed
 
 ####################################################################
 # Setup FleetDM database
 ####################################################################
 - name: Create FleetDM database
   community.mysql.mysql_db:
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
     login_user: 'root'
     login_password: '{{ mysql_root_password }}'
     name: '{{ mysql_fleetdm_db_name }}'
