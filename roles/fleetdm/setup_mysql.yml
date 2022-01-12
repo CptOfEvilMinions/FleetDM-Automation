@@ -18,6 +18,7 @@
 - name: Attempt to collect all possible information using passwordless root access
   community.mysql.mysql_info:
     login_user: root
+    login_unix_socket: '/var/run/mysqld/mysqld.sock'
   register: mysql_root_login
   ignore_errors: yes
 
